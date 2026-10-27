@@ -13698,6 +13698,349 @@ public final class Settings {
                 "com.android.server.display.HBM_SETTING_KEY";
 
         /**
+         * Per-apps device spoofing
+         * @hide
+         */
+        @Readable
+        public static final String PER_APPS_DEVICE_SPOOF = "per_apps_device_spoof";
+
+        /**
+         * Custom device spoof profiles for per-app spoofing
+         * @hide
+         */
+        @Readable
+        public static final String CUSTOM_SPOOF_PROFILES = "custom_spoof_profiles";
+
+        /**
+         * @hide
+         */
+        @Readable
+        public static final String PER_APPS_DEVICE_SPOOF_ENABLED = "per_apps_device_spoof_enabled";
+
+        /**
+         * @hide
+         */
+        @Readable
+        public static final String PER_APPS_DEVICE_SPOOF_CACHE = "per_apps_device_spoof_cache";
+
+        /**
+         * Whether to use PixelProps spoof for google apps
+         * @hide
+         */
+        @Readable
+        public static final String PI_PP_SPOOF = "pi_pp_spoof";
+
+        /**
+         * Whether to use Tensor spoof for google apps
+         * @hide
+         */
+        @Readable
+        public static final String PI_TENSOR_SPOOF = "pi_tensor_spoof";
+
+        /**
+         * Whether to use PIF spoof for Play store
+         * @hide
+         */
+        @Readable
+        public static final String PI_VENDING_SPOOF = "pi_vending_spoof";
+
+        /**
+         * Whether to use spoof for photos
+         * @hide
+         */
+        @Readable
+        public static final String PI_PHOTOS_SPOOF = "pi_photos_spoof";
+
+        /**
+         * Whether to use spoof for snapchat
+         * @hide
+         */
+        @Readable
+        public static final String PI_SNAPCHAT_SPOOF = "pi_snapchat_spoof";
+
+        /**
+         * Whether to show privacy indicator for location
+         * @hide
+         */
+        public static final String ENABLE_LOCATION_PRIVACY_INDICATOR = "enable_location_privacy_indicator";
+
+        /**
+         * Whether to show privacy indicator for camera
+         * @hide
+         */
+        public static final String ENABLE_CAMERA_PRIVACY_INDICATOR = "enable_camera_privacy_indicator";
+
+        /**
+         * Whether to show privacy indicator for media projection
+         * @hide
+         */
+        public static final String ENABLE_PROJECTION_PRIVACY_INDICATOR = "enable_projection_privacy_indicator";
+
+        /**
+         * Whether to show ambient instead of waking for the tap gesture
+         * @hide
+         */
+        public static final String DOZE_TAP_GESTURE_AMBIENT = "doze_tap_gesture_ambient";
+
+        /**
+         * Whether to show ambient instead of waking for the pickup gesture
+         * Do note quick pickup (device sensor) is already configured to do that
+         * @hide
+         */
+        public static final String DOZE_PICK_UP_GESTURE_AMBIENT = "doze_pick_up_gesture_ambient";
+
+        /**
+         * Which navigation bar layout to use
+         * 0 = Normal (Default)
+         * 1 = Compact
+         * 2 = Left-leaning
+         * 3 = Right-leaning
+         * @hide
+         */
+        public static final String NAVBAR_LAYOUT_MODE = "navbar_layout_mode";
+
+        /**
+         * Whether to pulse ambient on new music tracks
+         * @hide
+         */
+        public static final String PULSE_ON_NEW_TRACKS = "pulse_on_new_tracks";
+
+        /**
+         * Control whether the process CPU info meter should be shown.
+         * @hide
+         */
+        public static final String SHOW_CPU_OVERLAY = "show_cpu_overlay";
+
+        /**
+         * Control whether the process FPS info meter should be shown.
+         * @hide
+         */
+        public static final String SHOW_FPS_OVERLAY = "show_fps_overlay";
+
+        /**
+         * Whether to show or hide the arrow for back gesture
+         * @hide
+         */
+        public static final String BACK_GESTURE_ARROW = "back_gesture_arrow";
+
+        /**
+         * Whether or not to vibrate when back gesture is used
+         * @hide
+         */
+        public static final String BACK_GESTURE_HAPTIC = "back_gesture_haptic";
+
+        /**
+         * Whether to allow swipe down on lockscreen to view Quick Panel
+         * @hide
+         */
+        public static final String ENABLE_LOCKSCREEN_QUICK_SETTINGS = "enable_lockscreen_quick_settings";
+
+        /**
+         * Pulse lockscreen music visualizer
+         * @hide
+         */
+        public static final String LOCKSCREEN_PULSE_ENABLED = "lockscreen_pulse_enabled";
+
+        /**
+         * @hide
+         */
+        public static final String PULSE_BAR_COUNT = "pulse_bar_count";
+
+        /**
+         * @hide
+         */
+        public static final String PULSE_ROUNDED_BARS = "pulse_rounded_bars";
+
+        /**
+         * @hide
+         */
+        public static final String PULSE_COLOR = "pulse_color";
+
+        /**
+         * @hide
+         */
+        public static final String PULSE_RENDERER = "pulse_renderer";
+
+        /**
+         * @hide
+         */
+        public static final String PULSE_SHOW_ON_AMBIENT = "pulse_show_on_ambient";
+
+        /**
+         * @hide
+         */
+        public static final String PULSE_SHOW_ON_MEDIA_PLAYER = "media_player_pulse_enabled";
+
+        /**
+         * @hide
+         */
+        public static final String PULSE_HEIGHT_MULTIPLIER = "pulse_height_multiplier";
+
+        /**
+         * @hide
+         */
+        public static final String PULSE_CUSTOM_COLOR = "pulse_custom_color";
+
+        /**
+         * @hide
+         */
+	public static final String PULSE_BASS_HAPTICS = "pulse_bass_haptics";
+
+        /**
+         * @hide
+         */
+        public static final String PULSE_CAPTURE_MODE = "pulse_capture_mode";
+
+        /**
+         * Whether to enable Smart Pixels
+         * @hide
+         */
+        public static final String SMART_PIXEL_FILTER_ENABLED = "smart_pixel_filter_enabled";
+
+        /**
+         * Smart Pixels percentage
+         * @hide
+         */
+        public static final String SMART_PIXEL_FILTER_PERCENT = "smart_pixel_filter_percent";
+
+        /**
+         * Whether to use system accent color for lock screen clock text
+         * @hide
+         */
+        public static final String CLOCK_TEXT_ACCENT_COLOR = "clock_text_accent_color";
+
+        /**
+         * Lock screen clock text opacity (0-100)
+         * @hide
+         */
+        public static final String CLOCK_TEXT_OPACITY = "clock_text_opacity";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_STYLE = "lock_screen_custom_clock_style";
+
+        /**
+         * Whether to use default, system accent or custom color for lock screen clock text
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_COLOR_MODE = "lock_screen_custom_clock_color_mode";
+
+        /**
+         * Custom color for lock screen clock text
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_CUSTOM_COLOR = "lock_screen_custom_clock_custom_color";
+
+        /**
+         * Lock screen clock text opacity (0-100)
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_OPACITY = "lock_screen_custom_clock_opacity";
+
+        /**
+         * Adjust top margin for custom clock
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_MARGIN_TOP = "lock_screen_custom_clock_margin_top";
+
+        /**
+         * Custom clock size
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_SIZE = "lock_screen_custom_clock_size_scale";
+
+        /**
+         * Custom clock animation
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_AOD_ANIM = "lock_screen_custom_clock_aod_anim";
+
+        /**
+         * Custom clock animation
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_ALBUM_ART_COLOR = "lock_screen_custom_clock_album_art_color";
+
+        /**
+         * Custom clock wobble
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_WOBBLE_ON_CHARGE = "lock_screen_custom_clock_wobble_on_charge";
+
+        /**
+         * Custom start margin
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_MARGIN_START = "lock_screen_custom_clock_margin_start";
+
+        /**
+         * Custom gradient
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_GRADIENT_ENABLED = "lock_screen_custom_clock_gradient_enabled";
+
+        /**
+         * Custom gradient start
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_GRADIENT_COLOR_START = "lock_screen_custom_clock_gradient_color_start";
+
+        /**
+         * Custom gradient end
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_GRADIENT_COLOR_END = "lock_screen_custom_clock_gradient_color_end";
+
+        /**
+         * Custom gradient anchor
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_GRADIENT_ANCHOR_Y = "lock_screen_custom_clock_gradient_anchor_y";
+
+        /**
+         * Custom gradient radius
+         * @hide
+         */
+        public static final String LOCK_SCREEN_CUSTOM_CLOCK_GRADIENT_RADIUS = "lock_screen_custom_clock_gradient_radius";
+
+        /**
+         * Translucent notifications
+         * @hide
+         */
+        public static final String NOTIFICATION_ROW_TRANSPARENCY = "notification_row_transparency";
+
+        /**
+         * Translucent lockscreen notifications
+         * @hide
+         */
+        public static final String NOTIFICATION_ROW_TRANSPARENCY_LOCKSCREEN = "notification_row_transparency_lockscreen";
+
+        /**
+         * Whether to enable DOZE only when charging
+         * @hide
+         */
+        public static final String DOZE_ON_CHARGE = "doze_on_charge";
+
+        /**
+         * Whether to enable clipboard auto clear
+         * @hide
+         */
+        public static final String CLIPBOARD_AUTO_CLEAR_ENABLED = "clipboard_auto_clear_enabled";
+
+        /**
+         * Timeout length for clipboard auto clear
+         * @hide
+         */
+        public static final String CLIPBOARD_AUTO_CLEAR_TIMEOUT = "clipboard_auto_clear_timeout";
+
+        /**
+         * Shade color style customization
+         * @hide
+         */
+        public static final String SHADE_COLOR_STYLE = "shade_color_style";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
