@@ -525,9 +525,15 @@ public class TypedArray implements AutoCloseable {
         } else if (type == TypedValue.TYPE_STRING) {
             final TypedValue value = mValue;
             if (getValueAt(index, value)) {
-                final ColorStateList csl = mResources.loadColorStateList(
-                        value, value.resourceId, mTheme);
-                return csl.getDefaultColor();
+                try {
+                    final ColorStateList csl = mResources.loadColorStateList(
+                            value, value.resourceId, mTheme);
+                    if (csl != null) {
+                        return csl.getDefaultColor();
+                    }
+                } catch (Resources.NotFoundException | UnsupportedOperationException e) {
+                    return defValue;
+                }
             }
             return defValue;
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
@@ -608,7 +614,11 @@ public class TypedArray implements AutoCloseable {
                 //        "Failed to resolve attribute at index " + index + ": " + value
                 //                + ", theme=" + mTheme);
             }
-            return mResources.loadColorStateList(value, value.resourceId, mTheme);
+            try {
+                return mResources.loadColorStateList(value, value.resourceId, mTheme);
+            } catch (Resources.NotFoundException | UnsupportedOperationException e) {
+                return null;
+            }
         }
         return null;
     }

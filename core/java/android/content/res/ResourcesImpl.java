@@ -1278,14 +1278,20 @@ public class ResourcesImpl {
             return getColorStateListFromInt(value, key);
         }
 
-        ComplexColor complexColor = loadComplexColorFromName(wrapper, theme, value, id);
+        ComplexColor complexColor = null;
+        try {
+            complexColor = loadComplexColorFromName(wrapper, theme, value, id);
+        } catch (Exception e) {
+            // fallback
+        }
         if (complexColor != null && complexColor instanceof ColorStateList) {
             return (ColorStateList) complexColor;
         }
 
-        throw new NotFoundException(
-                "Can't find ColorStateList from drawable resource ID #0x"
-                        + Integer.toHexString(id));
+        if (value.type >= TypedValue.TYPE_FIRST_INT && value.type <= TypedValue.TYPE_LAST_INT) {
+            return ColorStateList.valueOf(value.data);
+        }
+        return ColorStateList.valueOf(0);
     }
 
     @NonNull
