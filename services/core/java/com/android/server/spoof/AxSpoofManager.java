@@ -199,6 +199,7 @@ public class AxSpoofManager implements IAxSpoofManager {
                 mResolver, ACTIVATED_KEY, 0, UserHandle.USER_SYSTEM) != 0;
         if (mActivated) {
             seedDefaultTargetsIfUnset();
+            seedDefaultKeyboxIfUnset();
             stagePifPropOverrides(getCached(Settings.Secure.SPOOF_PIF_CONFIG));
         } else {
             Log.i(TAG, "Spoofing off until Settings is opened for the first time");
@@ -285,6 +286,7 @@ public class AxSpoofManager implements IAxSpoofManager {
         PlayIntegritySpoofService.getInstance().loadConfig();
         TrickyStoreService.getInstance().initialize();
         seedDefaultTargetsIfUnset();
+        seedDefaultKeyboxIfUnset();
         stagePifPropOverrides(getCached(Settings.Secure.SPOOF_PIF_CONFIG));
         scheduleFirstRefresh();
         killGmsFamily();
@@ -360,6 +362,30 @@ public class AxSpoofManager implements IAxSpoofManager {
                 mResolver, Settings.Secure.SPOOF_TRICKYSTORE_TARGET,
                 TrickyStoreService.DEFAULT_TARGET_LIST, UserHandle.USER_SYSTEM);
         Log.i(TAG, "Seeded default TrickyStore targets");
+    }
+
+    private void seedDefaultKeyboxIfUnset() {
+        String current = Settings.Secure.getStringForUser(
+                mResolver, Settings.Secure.SPOOF_TRICKYSTORE_KEYBOX, UserHandle.USER_SYSTEM);
+        if (current != null && !current.trim().isEmpty()) return;
+
+        java.io.File defaultFile = new java.io.File("/product/etc/security/keybox.xml");
+        if (!defaultFile.exists()) {
+            defaultFile = new java.io.File("/system/etc/security/keybox.xml");
+        }
+        if (defaultFile.exists()) {
+            try {
+                byte[] bytes = java.nio.file.Files.readAllBytes(defaultFile.toPath());
+                String encoded = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                Settings.Secure.putStringForUser(
+                        mResolver, Settings.Secure.SPOOF_TRICKYSTORE_KEYBOX, encoded, UserHandle.USER_SYSTEM);
+                Settings.Secure.putStringForUser(
+                        mResolver, KEYBOX_SOURCE_KEY, KEYBOX_SOURCE_USER, UserHandle.USER_SYSTEM);
+                Log.i(TAG, "Seeded default TrickyStore keybox from " + defaultFile.getAbsolutePath());
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to seed default keybox", e);
+            }
+        }
     }
 
     /**
@@ -939,7 +965,22 @@ public class AxSpoofManager implements IAxSpoofManager {
     @Override
     public String getTrickyStoreKeyBox() {
         if (!mActivated) return null;
-        return getCached(Settings.Secure.SPOOF_TRICKYSTORE_KEYBOX);
+        String keybox = getCached(Settings.Secure.SPOOF_TRICKYSTORE_KEYBOX);
+        if (keybox != null && !keybox.trim().isEmpty()) {
+            return keybox;
+        }
+        java.io.File defaultFile = new java.io.File("/product/etc/security/keybox.xml");
+        if (!defaultFile.exists()) {
+            defaultFile = new java.io.File("/system/etc/security/keybox.xml");
+        }
+        if (defaultFile.exists()) {
+            try {
+                return new String(java.nio.file.Files.readAllBytes(defaultFile.toPath()), StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to read default keybox file", e);
+            }
+        }
+        return null;
     }
 
     @Override
