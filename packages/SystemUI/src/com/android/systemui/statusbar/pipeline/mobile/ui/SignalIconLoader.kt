@@ -31,6 +31,9 @@ import android.provider.Settings
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
+import java.util.Collections
+import java.util.WeakHashMap
+
 
 @SysUISingleton
 class SignalIconLoader @Inject constructor(
@@ -47,25 +50,7 @@ class SignalIconLoader @Inject constructor(
 
     private var userPreferenceEnabled: Boolean = true
 
-    private val settingsObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
-        override fun onChange(selfChange: Boolean, uri: Uri?) {
-            super.onChange(selfChange, uri)
-            loadUserPreference()
-            reload()
-            notifyReloadCallbacks()
-        }
-    }
 
-    private val broadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                ACTION_RELOAD_MOBILE_ICONS -> {
-                    reload()
-                    notifyReloadCallbacks()
-                }
-            }
-        }
-    }
 
     init {
         loadUserPreference()
@@ -75,21 +60,10 @@ class SignalIconLoader @Inject constructor(
             detectOverlayIcons()
         }
 
-        try {
-            val filter = IntentFilter(ACTION_RELOAD_MOBILE_ICONS)
-            context.registerReceiver(broadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to register broadcast receiver", e)
+        synchronized(activeInstances) {
+            activeInstances.add(this)
         }
-
-        try {
-            contentResolver.registerContentObserver(
-                Settings.System.getUriFor(SETTING_KEY),
-                false,
-                settingsObserver
-            )
-        } catch (e: Exception) {
-        }
+        registerShared(context.applicationContext ?: context)
     }
 
     private fun determineIconSize() {
@@ -287,23 +261,66 @@ class SignalIconLoader @Inject constructor(
     }
 
     fun destroy() {
-        try {
-            contentResolver.unregisterContentObserver(settingsObserver)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to unregister settings observer", e)
+        synchronized(activeInstances) {
+            activeInstances.remove(this)
         }
-
-        try {
-            context.unregisterReceiver(broadcastReceiver)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to unregister broadcast receiver", e)
-        }
-
         reloadCallbacks.clear()
     }
 
     companion object {
         private const val TAG = "SignalIconLoader"
+        private val activeInstances = Collections.newSetFromMap(WeakHashMap<SignalIconLoader, Boolean>())
+        private var isSharedReceiverRegistered = false
+        private var isSharedObserverRegistered = false
+
+        private val sharedReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == ACTION_RELOAD_MOBILE_ICONS) {
+                    val list = synchronized(activeInstances) { activeInstances.toList() }
+                    list.forEach {
+                        it.reload()
+                        it.notifyReloadCallbacks()
+                    }
+                }
+            }
+        }
+
+        private val sharedObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                super.onChange(selfChange, uri)
+                val list = synchronized(activeInstances) { activeInstances.toList() }
+                list.forEach {
+                    it.loadUserPreference()
+                    it.reload()
+                    it.notifyReloadCallbacks()
+                }
+            }
+        }
+
+        private fun registerShared(appContext: Context) {
+            synchronized(activeInstances) {
+                if (!isSharedReceiverRegistered) {
+                    try {
+                        val filter = IntentFilter(ACTION_RELOAD_MOBILE_ICONS)
+                        appContext.registerReceiver(sharedReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+                        isSharedReceiverRegistered = true
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to register shared broadcast receiver", e)
+                    }
+                }
+                if (!isSharedObserverRegistered) {
+                    try {
+                        appContext.contentResolver.registerContentObserver(
+                            Settings.System.getUriFor(SETTING_KEY),
+                            false,
+                            sharedObserver
+                        )
+                        isSharedObserverRegistered = true
+                    } catch (e: Exception) {
+                    }
+                }
+            }
+        }
         const val ACTION_RELOAD_MOBILE_ICONS = "com.android.systemui.RELOAD_MOBILE_ICONS"
         const val SETTING_KEY = "signal_icon_use_overlays"
         const val DEFAULT_USE_OVERLAYS = true
