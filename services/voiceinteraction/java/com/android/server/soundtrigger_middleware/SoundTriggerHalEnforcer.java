@@ -230,6 +230,10 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
             Slog.e(TAG, "HAL died");
             throw new RecoverableException(Status.DEAD_OBJECT);
         }
+        if (e instanceof HalException) {
+            Slog.w(TAG, "HAL returned error status: " + e.getMessage() + ", skipping reboot");
+            throw new RecoverableException(Status.INTERNAL_ERROR, e.getMessage());
+        }
         Slog.e(TAG, "Exception caught from HAL, rebooting HAL");
         reboot();
         throw e;
