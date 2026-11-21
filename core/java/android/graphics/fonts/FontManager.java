@@ -412,16 +412,6 @@ public class FontManager {
     }
 
 
-    /**
-     * @hide
-     */
-    public void clearUpdates() {
-        try {
-            mIFontManager.clearUpdates();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
 
     /**
      * Installs a user supplied font file as the system-wide UI font.
