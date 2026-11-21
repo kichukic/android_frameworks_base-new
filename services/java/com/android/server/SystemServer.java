@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import com.android.server.AxExtServiceFactory;
+
 import static android.app.admin.DevicePolicyManager.MULTIUSER_MANAGED_DEVICE_PROVISIONING_STATE_UNMANAGED;
 import static android.app.lskfreset.flags.Flags.enableLskfResetManager;
 import static android.app.privatecompute.flags.Flags.enablePccFrameworkSupport;
@@ -1008,6 +1010,8 @@ public final class SystemServer implements Dumpable {
 
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
 
+            AxExtServiceFactory.init(mSystemContext);
+
             // Lazily load the pre-installed system font map in SystemServer only if we're not doing
             // the optimized font loading in the FontManagerService.
             if (!com.android.text.flags.Flags.useOptimizedBoottimeFontLoading()
@@ -1297,6 +1301,7 @@ public final class SystemServer implements Dumpable {
         mActivityManagerService = ActivityManagerService.Lifecycle.startService(
                 mSystemServiceManager, atm);
         mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
+        AxExtServiceFactory.injectActivityManagerService(mActivityManagerService);
         mActivityManagerService.setInstaller(installer);
         mWindowManagerGlobalLock = atm.getGlobalLock();
         t.traceEnd();
@@ -1383,6 +1388,7 @@ public final class SystemServer implements Dumpable {
         }
 
         mFirstBoot = mPackageManagerService.isFirstBoot();
+        AxExtServiceFactory.injectPackageManagerservice(mPackageManagerService);
         mPackageManager = mSystemContext.getPackageManager();
         t.traceEnd();
 
@@ -1762,6 +1768,8 @@ public final class SystemServer implements Dumpable {
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_HIGH
                             | DUMP_FLAG_PROTO);
             t.traceEnd();
+
+            AxExtServiceFactory.injectWindowManagerService(wm);
 
             t.traceBegin("SetWindowManagerService");
             mActivityManagerService.setWindowManager(wm);

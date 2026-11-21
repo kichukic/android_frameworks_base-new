@@ -7408,6 +7408,16 @@ public final class Settings {
      * or by calling the "put" methods that this class contains.
      */
     public static final class Secure extends NameValueTable {
+        /** @hide */
+        public static final String SPOOF_PIF_CONFIG = "spoof_pif_config";
+        /** @hide */
+        public static final String SPOOF_GAMEPROPS_CONFIG = "spoof_gameprops_config";
+        /** @hide */
+        public static final String SPOOF_TRICKYSTORE_TARGET = "spoof_trickystore_target";
+        /** @hide */
+        public static final String SPOOF_TRICKYSTORE_KEYBOX = "spoof_trickystore_keybox";
+        /** @hide */
+        public static final String SPOOF_TRICKYSTORE_PATCH = "spoof_trickystore_patch";
         // NOTE: If you add new settings here, be sure to add them to
         // com.android.providers.settings.SettingsProtoDumpUtil#dumpProtoSecureSettingsLocked.
 
