@@ -18,6 +18,9 @@
 package com.android.systemui.shade.ui
 
 import android.content.Context
+import android.content.res.Configuration
+import android.os.UserHandle
+import android.provider.Settings
 import com.android.internal.graphics.ColorUtils
 import com.android.internal.graphics.cam.Cam
 import com.android.systemui.res.R
