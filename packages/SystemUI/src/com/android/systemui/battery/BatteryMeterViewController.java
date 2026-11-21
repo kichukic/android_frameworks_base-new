@@ -125,6 +125,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 public void onUserChanged(int newUser, @NonNull Context userContext) {
                     mContentResolver.unregisterContentObserver(mSettingObserver);
                     registerShowBatteryPercentObserver(newUser);
+                    mView.updateBatteryStyle();
                     mView.updateShowPercent();
                 }
             };
@@ -170,6 +171,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
         registerGlobalBatteryUpdateObserver();
         mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mMainHandler));
 
+        mView.updateBatteryStyle();
         mView.updateShowPercent();
     }
 
@@ -216,6 +218,11 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 false,
                 mSettingObserver,
                 user);
+        mContentResolver.registerContentObserver(
+                Settings.System.getUriFor("status_bar_battery_style"),
+                false,
+                mSettingObserver,
+                user);
     }
 
     private void registerGlobalBatteryUpdateObserver() {
@@ -233,6 +240,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
+            mView.updateBatteryStyle();
             mView.updateShowPercent();
             if (TextUtils.equals(uri.getLastPathSegment(),
                     Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME)) {

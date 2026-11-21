@@ -74,6 +74,13 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     public static final int MODE_OFF = 2;
     public static final int MODE_ESTIMATE = 3;
 
+    public static final int BATTERY_STYLE_PORTRAIT = 0;
+    public static final int BATTERY_STYLE_TEXT = 2;
+    public static final int BATTERY_STYLE_HIDDEN = 4;
+
+    private int mBatteryStyle = BATTERY_STYLE_PORTRAIT;
+
+
     private final AccessorizedBatteryDrawable mDrawable;
     private final ImageView mBatteryIconView;
     private TextView mBatteryPercentView;
@@ -393,6 +400,33 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     /**
      * Updates percent view by removing old one and reinflating if necessary
      */
+
+    public void updateBatteryStyle() {
+        mBatteryStyle = Settings.System.getIntForUser(getContext().getContentResolver(),
+                "status_bar_battery_style", BATTERY_STYLE_PORTRAIT, UserHandle.USER_CURRENT);
+
+        if (mBatteryStyle == BATTERY_STYLE_HIDDEN) {
+            setVisibility(View.GONE);
+            return;
+        }
+
+        setVisibility(View.VISIBLE);
+        if (mBatteryStyle == BATTERY_STYLE_TEXT) {
+            if (mBatteryIconView != null) {
+                mBatteryIconView.setVisibility(View.GONE);
+            }
+            if (mBatteryPercentView == null) {
+                addPercentView(inflatePercentView());
+            }
+            updatePercentText();
+        } else {
+            if (mBatteryIconView != null) {
+                mBatteryIconView.setVisibility(View.VISIBLE);
+            }
+            updateShowPercent();
+        }
+    }
+
     public void updatePercentView() {
         if (mBatteryPercentView != null) {
             removeView(mBatteryPercentView);
@@ -565,8 +599,8 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 SHOW_BATTERY_PERCENT, getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_defaultBatteryPercentageSetting)
                 ? 1 : 0, UserHandle.USER_CURRENT));
-        boolean shouldShow =
-                (mShowPercentAvailable && systemSetting && mShowPercentMode != MODE_OFF)
+        boolean shouldShow = (mBatteryStyle == BATTERY_STYLE_TEXT)
+                || (mShowPercentAvailable && systemSetting && mShowPercentMode != MODE_OFF)
                 || mShowPercentMode == MODE_ON
                 || mShowPercentMode == MODE_ESTIMATE;
         shouldShow = shouldShow && !mBatteryStateUnknown;
