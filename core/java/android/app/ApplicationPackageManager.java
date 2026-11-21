@@ -842,6 +842,12 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     @RavenwoodRedirect
     public boolean hasSystemFeature(String name, int version) {
+        if (name != null && ("com.google.android.feature.PIXEL_EXPERIENCE".equals(name)
+                || "com.google.android.apps.photos.NEXUS_PRELOAD".equals(name))) {
+            if (mContext != null && "com.google.android.apps.photos".equals(mContext.getPackageName())) {
+                return true;
+            }
+        }
         // We check for system features in the following order:
         //    * Build time-defined system features (constant, very efficient)
         //    * SDK-defined system features (cached at process start, very efficient)

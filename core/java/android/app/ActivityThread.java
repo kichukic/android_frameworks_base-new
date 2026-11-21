@@ -8179,6 +8179,8 @@ public final class ActivityThread extends ClientTransactionHandler
             if (pifService.isSpoofSignatureEnabled()) {
                 pifService.spoofSignature(data.processName);
             }
+        } else if (pifService.isPhotos(data.processName)) {
+            pifService.spoofPhotos();
         }
 
         // Initialize the default http proxy in this process.
