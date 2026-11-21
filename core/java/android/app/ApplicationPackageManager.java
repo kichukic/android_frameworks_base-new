@@ -842,7 +842,8 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     @RavenwoodRedirect
     public boolean hasSystemFeature(String name, int version) {
-        if (name != null && ("com.google.android.feature.PIXEL_EXPERIENCE".equals(name)
+        if (SystemProperties.getBoolean("persist.sys.kic.gphotos_spoof", true)
+                && name != null && ("com.google.android.feature.PIXEL_EXPERIENCE".equals(name)
                 || "com.google.android.apps.photos.NEXUS_PRELOAD".equals(name))) {
             if (mContext != null && "com.google.android.apps.photos".equals(mContext.getPackageName())) {
                 return true;

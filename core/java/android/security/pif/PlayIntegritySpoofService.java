@@ -367,6 +367,9 @@ public final class PlayIntegritySpoofService {
     }
 
     public boolean isPhotos(String processName) {
+        if (!SystemProperties.getBoolean("persist.sys.kic.gphotos_spoof", true)) {
+            return false;
+        }
         return processName != null && (processName.equals(PACKAGE_GPHOTOS)
                 || processName.startsWith(PACKAGE_GPHOTOS + ":"));
     }
