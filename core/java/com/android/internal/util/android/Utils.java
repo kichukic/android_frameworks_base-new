@@ -131,16 +131,9 @@ public class Utils {
     }
 
     public static void restartSystemUI() {
-        final IStatusBarService barService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        if (barService == null) {
-            Log.w(TAG, "restartSystemUI: statusbar service not available");
-            return;
-        }
-        try {
-            barService.restartSystemUI();
-        } catch (RemoteException | RuntimeException e) {
-            Log.e(TAG, "restartSystemUI failed", e);
+        Context context = ActivityThread.currentApplication();
+        if (context != null) {
+            SystemRestartUtils.restartProcess(context, "com.android.systemui");
         }
     }
 

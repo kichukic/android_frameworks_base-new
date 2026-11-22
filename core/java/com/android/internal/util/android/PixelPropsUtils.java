@@ -450,10 +450,16 @@ public final class PixelPropsUtils {
         }
     }
 
-    private static String[] getStringArrayResSafely(int resId) {
-        String[] strArr = Resources.getSystem().getStringArray(resId);
-        if (strArr == null) strArr = new String[0];
-        return strArr;
+    private static String[] getStringArrayResSafely(String resName) {
+        try {
+            int resId = Resources.getSystem().getIdentifier(resName, "array", "android");
+            if (resId != 0) {
+                String[] strArr = Resources.getSystem().getStringArray(resId);
+                if (strArr != null) return strArr;
+            }
+        } catch (Exception ignored) {
+        }
+        return new String[0];
     }
 
     public static boolean isPackageGoogle(String pkg) {
@@ -466,7 +472,7 @@ public final class PixelPropsUtils {
                 mLauncherPkgs =
                         new HashSet<>(
                                 Arrays.asList(
-                                        getStringArrayResSafely(R.array.config_launcherPackages)));
+                                        getStringArrayResSafely("config_launcherPackages")));
             }
             return mLauncherPkgs;
         }
@@ -544,7 +550,7 @@ public final class PixelPropsUtils {
 
     // Whitelist of package names to bypass FGS type validation
     public static boolean shouldBypassFGSValidation(String packageName) {
-        if (Arrays.asList(getStringArrayResSafely(R.array.config_fgsTypeValidationBypassPackages))
+        if (Arrays.asList(getStringArrayResSafely("config_fgsTypeValidationBypassPackages"))
                 .contains(packageName)) {
             dlog("shouldBypassFGSValidation: "
                     + "Bypassing FGS type validation for whitelisted app: "
@@ -557,8 +563,7 @@ public final class PixelPropsUtils {
     // Whitelist of package names to bypass alarm manager validation
     public static boolean shouldBypassAlarmManagerValidation(String packageName) {
         if (Arrays.asList(
-                        getStringArrayResSafely(
-                                R.array.config_alarmManagerValidationBypassPackages))
+                        getStringArrayResSafely("config_alarmManagerValidationBypassPackages"))
                 .contains(packageName)) {
             dlog("shouldBypassAlarmManagerValidation: "
                     + "Bypassing alarm manager validation for whitelisted app: "
@@ -571,8 +576,7 @@ public final class PixelPropsUtils {
     // Whitelist of package names to bypass broadcast receiver validation
     public static boolean shouldBypassBroadcastReceiverValidation(String packageName) {
         if (Arrays.asList(
-                        getStringArrayResSafely(
-                                R.array.config_broadcastReceiverValidationBypassPackages))
+                        getStringArrayResSafely("config_broadcastReceiverValidationBypassPackages"))
                 .contains(packageName)) {
             dlog("shouldBypassBroadcastReceiverValidation: "
                     + "Bypassing broadcast receiver validation for whitelisted app: "

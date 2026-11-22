@@ -38,15 +38,29 @@ public class SystemRestartUtils {
 
     private static final int RESTART_TIMEOUT = 1000;
 
+    private static String getStringSafely(Context context, String resName, String defaultVal) {
+        try {
+            int id = context.getResources().getIdentifier(resName, "string", context.getPackageName());
+            if (id == 0) {
+                id = Resources.getSystem().getIdentifier(resName, "string", "android");
+            }
+            if (id != 0) {
+                return context.getString(id);
+            }
+        } catch (Exception ignored) {
+        }
+        return defaultVal;
+    }
+
     public static void showSystemRestartDialog(Context context) {
         new AlertDialog.Builder(context)
-                .setTitle(R.string.system_restart_title)
-                .setMessage(R.string.system_restart_message)
-                .setPositiveButton(R.string.ok, (dialog, id) -> {
+                .setTitle(getStringSafely(context, "system_restart_title", "System Restart"))
+                .setMessage(getStringSafely(context, "system_restart_message", "System is restarting..."))
+                .setPositiveButton(android.R.string.ok, (dialog, id) -> {
                     Handler handler = new Handler();
                     handler.postDelayed(() -> restartSystem(context), RESTART_TIMEOUT);
                 })
-                .setNegativeButton(R.string.cancel, null)
+                .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
@@ -112,15 +126,15 @@ public class SystemRestartUtils {
         }
     }
 
-    private static void showRestartDialog(Context context, int title, int message, Runnable action) {
+    private static void showRestartDialog(Context context, CharSequence title, CharSequence message, Runnable action) {
         new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton(R.string.ok, (dialog, id) -> {
+                .setPositiveButton(android.R.string.ok, (dialog, id) -> {
                     Handler handler = new Handler();
                     handler.postDelayed(action, RESTART_TIMEOUT);
                 })
-                .setNegativeButton(R.string.cancel, null)
+                .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
@@ -160,10 +174,16 @@ public class SystemRestartUtils {
     }
 
     public static void showSettingsRestartDialog(Context context) {
-        showRestartDialog(context, R.string.settings_restart_title, R.string.settings_restart_message, () -> restartProcess(context, "com.android.settings"));
+        showRestartDialog(context,
+                getStringSafely(context, "settings_restart_title", "Restart Settings"),
+                getStringSafely(context, "settings_restart_message", "Settings needs to restart to apply changes."),
+                () -> restartProcess(context, "com.android.settings"));
     }
 
     public static void showSystemUIRestartDialog(Context context) {
-        showRestartDialog(context, R.string.systemui_restart_title, R.string.systemui_restart_message, () -> restartProcess(context, "com.android.systemui"));
+        showRestartDialog(context,
+                getStringSafely(context, "systemui_restart_title", "Restart SystemUI"),
+                getStringSafely(context, "systemui_restart_message", "SystemUI needs to restart to apply changes."),
+                () -> restartProcess(context, "com.android.systemui"));
     }
 }
