@@ -39,6 +39,7 @@ public final class PlayIntegritySpoofService {
     private static final String DROIDGUARD_PACKAGE = "com.google.android.gms.unstable";
     private static final String VENDING_PACKAGE = "com.android.vending";
     private static final String GMS_PACKAGE = "com.google.android.gms";
+    private static final String PACKAGE_GPHOTOS = "com.google.android.apps.photos";
 
     private static final String ROM_SIGNATURE_DATA = "MIIFyTCCA7GgAwIBAgIVALyxxl+zDS9SL68SzOr48309eAZyMA0GCSqGSIb3DQEBCwUAMHQxCzAJ" +
             "BgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQw" +
@@ -365,6 +366,28 @@ public final class PlayIntegritySpoofService {
     public boolean isGmsProcess(String dataDir) {
         if (dataDir == null) return false;
         return dataDir.endsWith("/" + GMS_PACKAGE) || dataDir.endsWith("/" + VENDING_PACKAGE);
+    }
+
+    public boolean isPhotos(String processName) {
+        if (!SystemProperties.getBoolean("persist.sys.kic.gphotos_spoof", true)) {
+            return false;
+        }
+        return processName != null && (processName.equals(PACKAGE_GPHOTOS)
+                || processName.startsWith(PACKAGE_GPHOTOS + ":"));
+    }
+
+    public void spoofPhotos() {
+        spoofField("BRAND", "google", "Photos");
+        spoofField("MANUFACTURER", "Google", "Photos");
+        spoofField("DEVICE", "marlin", "Photos");
+        spoofField("PRODUCT", "marlin", "Photos");
+        spoofField("HARDWARE", "marlin", "Photos");
+        spoofField("MODEL", "Pixel XL", "Photos");
+        spoofField("ID", "QP1A.191005.007.A3", "Photos");
+        spoofField("FINGERPRINT", "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys", "Photos");
+        spoofField("TYPE", "user", "Photos");
+        spoofField("TAGS", "release-keys", "Photos");
+        Log.i(TAG, "Spoofed Google Photos as Pixel XL (marlin) for unlimited original quality backup");
     }
 
     public boolean isDroidGuard(String processName) {
