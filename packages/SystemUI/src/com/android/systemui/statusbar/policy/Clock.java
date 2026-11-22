@@ -97,6 +97,23 @@ public class Clock extends TextView implements
     private static final int AM_PM_STYLE_GONE    = 2;
 
     private int mAmPmStyle = AM_PM_STYLE_GONE;
+    private static final int STYLE_DATE_LEFT = 0;
+    private static final int STYLE_DATE_RIGHT = 1;
+
+    private static final int CLOCK_DATE_DISPLAY_GONE = 0;
+    private static final int CLOCK_DATE_DISPLAY_SMALL = 1;
+    private static final int CLOCK_DATE_DISPLAY_NORMAL = 2;
+
+    private static final int CLOCK_DATE_STYLE_REGULAR = 0;
+    private static final int CLOCK_DATE_STYLE_LOWERCASE = 1;
+    private static final int CLOCK_DATE_STYLE_UPPERCASE = 2;
+
+    private static final String DEFAULT_CLOCK_DATE_FORMAT = "EEE";
+
+    private int mClockDateDisplay = CLOCK_DATE_DISPLAY_GONE;
+    private int mClockDateStyle = CLOCK_DATE_STYLE_REGULAR;
+    private int mClockDatePosition = STYLE_DATE_LEFT;
+    private String mClockDateFormat = DEFAULT_CLOCK_DATE_FORMAT;
     private boolean mShowSeconds;
     private ContentObserver mContentObserver;
     private Handler mSecondsHandler;
@@ -134,10 +151,12 @@ public class Clock extends TextView implements
                 0, 0);
         try {
             mAmPmStyle = readClockAmPm(context);
+            updateClockDateSettings(context);
             mContentObserver = new ContentObserver(null) {
                 @Override
                 public void onChange(boolean selfChange) {
                     mAmPmStyle = readClockAmPm(context);
+                    updateClockDateSettings(context);
                     // Force refresh of dependent variables.
                     mContentDescriptionFormatString = "";
                     mDateTimePatternGenerator = null;
@@ -210,6 +229,19 @@ public class Clock extends TextView implements
             mContext.getContentResolver().registerContentObserver(
                     LineageSettings.System.getUriFor(LineageSettings.System.STATUS_BAR_AM_PM),
                     false, mContentObserver);
+            mContext.getContentResolver().registerContentObserver(
+                    LineageSettings.System.getUriFor(LineageSettings.System.STATUS_BAR_CLOCK_DATE_DISPLAY),
+                    false, mContentObserver);
+            mContext.getContentResolver().registerContentObserver(
+                    LineageSettings.System.getUriFor(LineageSettings.System.STATUS_BAR_CLOCK_DATE_STYLE),
+                    false, mContentObserver);
+            mContext.getContentResolver().registerContentObserver(
+                    LineageSettings.System.getUriFor(LineageSettings.System.STATUS_BAR_CLOCK_DATE_POSITION),
+                    false, mContentObserver);
+            mContext.getContentResolver().registerContentObserver(
+                    LineageSettings.System.getUriFor(LineageSettings.System.STATUS_BAR_CLOCK_DATE_FORMAT),
+                    false, mContentObserver);
+            updateClockDateSettings(mContext);
             mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
             mCurrentUserId = mUserTracker.getUserId();
         }
@@ -365,6 +397,24 @@ public class Clock extends TextView implements
                 AM_PM_STYLE_GONE, UserHandle.USER_CURRENT);
     }
 
+    private void updateClockDateSettings(Context context) {
+        mClockDateDisplay = LineageSettings.System.getIntForUser(
+                context.getContentResolver(), LineageSettings.System.STATUS_BAR_CLOCK_DATE_DISPLAY,
+                CLOCK_DATE_DISPLAY_GONE, UserHandle.USER_CURRENT);
+        mClockDateStyle = LineageSettings.System.getIntForUser(
+                context.getContentResolver(), LineageSettings.System.STATUS_BAR_CLOCK_DATE_STYLE,
+                CLOCK_DATE_STYLE_REGULAR, UserHandle.USER_CURRENT);
+        mClockDatePosition = LineageSettings.System.getIntForUser(
+                context.getContentResolver(), LineageSettings.System.STATUS_BAR_CLOCK_DATE_POSITION,
+                STYLE_DATE_LEFT, UserHandle.USER_CURRENT);
+        mClockDateFormat = LineageSettings.System.getStringForUser(
+                context.getContentResolver(), LineageSettings.System.STATUS_BAR_CLOCK_DATE_FORMAT,
+                UserHandle.USER_CURRENT);
+        if (TextUtils.isEmpty(mClockDateFormat)) {
+            mClockDateFormat = DEFAULT_CLOCK_DATE_FORMAT;
+        }
+    }
+
     private void updateShowSeconds() {
         if (mShowSeconds) {
             // Wait until we have a display to start trying to show seconds.
@@ -462,12 +512,62 @@ public class Clock extends TextView implements
                     formatted.delete(magic2, magic2 + 1);
                     formatted.delete(magic1, magic1 + 1);
                 }
-                return formatted;
+                return formatWithDate(formatted);
             }
         }
 
-        return result;
+        return formatWithDate(result);
 
+    }
+
+    private CharSequence formatWithDate(CharSequence timeResult) {
+        if (mClockDateDisplay == CLOCK_DATE_DISPLAY_GONE) {
+            return timeResult;
+        }
+
+        String dateString;
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat(mClockDateFormat,
+                    mLocale != null ? mLocale : Locale.getDefault());
+            dateString = dateFormat.format(mCalendar.getTime());
+        } catch (Exception e) {
+            try {
+                SimpleDateFormat fallbackFormat = new SimpleDateFormat(DEFAULT_CLOCK_DATE_FORMAT,
+                        mLocale != null ? mLocale : Locale.getDefault());
+                dateString = fallbackFormat.format(mCalendar.getTime());
+            } catch (Exception ignored) {
+                dateString = "";
+            }
+        }
+
+        if (TextUtils.isEmpty(dateString)) {
+            return timeResult;
+        }
+
+        Locale activeLocale = mLocale != null ? mLocale : Locale.getDefault();
+        if (mClockDateStyle == CLOCK_DATE_STYLE_LOWERCASE) {
+            dateString = dateString.toLowerCase(activeLocale);
+        } else if (mClockDateStyle == CLOCK_DATE_STYLE_UPPERCASE) {
+            dateString = dateString.toUpperCase(activeLocale);
+        }
+
+        SpannableStringBuilder dateSpan = new SpannableStringBuilder(dateString);
+        if (mClockDateDisplay == CLOCK_DATE_DISPLAY_SMALL) {
+            CharacterStyle style = new RelativeSizeSpan(0.7f);
+            dateSpan.setSpan(style, 0, dateSpan.length(), Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+        }
+
+        SpannableStringBuilder fullClock = new SpannableStringBuilder();
+        if (mClockDatePosition == STYLE_DATE_LEFT) {
+            fullClock.append(dateSpan);
+            fullClock.append(" ");
+            fullClock.append(timeResult);
+        } else {
+            fullClock.append(timeResult);
+            fullClock.append(" ");
+            fullClock.append(dateSpan);
+        }
+        return fullClock;
     }
 
     private boolean mDemoMode;
