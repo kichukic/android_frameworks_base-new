@@ -113,7 +113,6 @@ public final class PlayIntegritySpoofService {
     public static synchronized PlayIntegritySpoofService getInstance() {
         if (sInstance == null) {
             sInstance = new PlayIntegritySpoofService();
-            sInstance.loadConfig();
         }
         return sInstance;
     }
