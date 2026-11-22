@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.IActivityManager;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Handler;

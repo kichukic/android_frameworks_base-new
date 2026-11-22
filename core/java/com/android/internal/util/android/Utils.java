@@ -17,6 +17,7 @@
 package com.android.internal.util.android;
 
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.app.IActivityManager;
 import android.app.role.RoleManager;
 import android.content.Context;

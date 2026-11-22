@@ -39,11 +39,21 @@ public final class DeviceConfigUtils {
     private static Boolean sEnableDeviceConfigUtils =
             SystemProperties.getBoolean("persist.sys.dchooks.enable", true);
 
+    private static String[] getStringArraySafely(String resName) {
+        try {
+            int resId = Resources.getSystem().getIdentifier(resName, "array", "android");
+            if (resId != 0) {
+                String[] arr = Resources.getSystem().getStringArray(resId);
+                if (arr != null) return arr;
+            }
+        } catch (Exception ignored) {
+        }
+        return new String[0];
+    }
+
     private static String[] getDeviceConfigsOverride() {
-        String[] globalDeviceConfigs =
-            Resources.getSystem().getStringArray(com.android.internal.R.array.global_device_configs_override);
-        String[] deviceConfigs =
-            Resources.getSystem().getStringArray(com.android.internal.R.array.device_configs_override);
+        String[] globalDeviceConfigs = getStringArraySafely("global_device_configs_override");
+        String[] deviceConfigs = getStringArraySafely("device_configs_override");
         String[] allDeviceConfigs = Arrays.copyOf(globalDeviceConfigs, globalDeviceConfigs.length + deviceConfigs.length);
         System.arraycopy(deviceConfigs, 0, allDeviceConfigs, globalDeviceConfigs.length, deviceConfigs.length);
         return allDeviceConfigs;
