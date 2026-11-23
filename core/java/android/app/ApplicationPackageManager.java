@@ -200,6 +200,67 @@ public class ApplicationPackageManager extends PackageManager {
     public static final String PERMISSION_CONTROLLER_RESOURCE_PACKAGE =
             "com.android.permissioncontroller";
 
+    private static final Set<String> STEALTH_ROOT_PACKAGES = Set.of(
+            "com.resukisu.resukisu",
+            "com.topjohnwu.magisk",
+            "io.github.vvb2060.magisk",
+            "me.bmax.apatch",
+            "org.lsposed.manager",
+            "org.meowcat.edxposed.manager",
+            "de.robv.android.xposed.installer"
+    );
+
+    private boolean shouldHidePackageFromCaller(String packageName) {
+        if (packageName == null || !STEALTH_ROOT_PACKAGES.contains(packageName)) {
+            return false;
+        }
+        int uid = Process.myUid();
+        if (uid < Process.FIRST_APPLICATION_UID) {
+            return false;
+        }
+        String callingPkg = mContext != null ? mContext.getPackageName() : null;
+        if (packageName.equals(callingPkg)) {
+            return false;
+        }
+        return true;
+    }
+
+    private List<PackageInfo> filterHiddenPackages(List<PackageInfo> list) {
+        if (list == null || list.isEmpty() || Process.myUid() < Process.FIRST_APPLICATION_UID) {
+            return list;
+        }
+        String callingPkg = mContext != null ? mContext.getPackageName() : null;
+        List<PackageInfo> filtered = new ArrayList<>(list.size());
+        for (PackageInfo pi : list) {
+            if (pi.packageName != null && STEALTH_ROOT_PACKAGES.contains(pi.packageName)) {
+                if (pi.packageName.equals(callingPkg)) {
+                    filtered.add(pi);
+                }
+            } else {
+                filtered.add(pi);
+            }
+        }
+        return filtered;
+    }
+
+    private List<ApplicationInfo> filterHiddenApplications(List<ApplicationInfo> list) {
+        if (list == null || list.isEmpty() || Process.myUid() < Process.FIRST_APPLICATION_UID) {
+            return list;
+        }
+        String callingPkg = mContext != null ? mContext.getPackageName() : null;
+        List<ApplicationInfo> filtered = new ArrayList<>(list.size());
+        for (ApplicationInfo ai : list) {
+            if (ai.packageName != null && STEALTH_ROOT_PACKAGES.contains(ai.packageName)) {
+                if (ai.packageName.equals(callingPkg)) {
+                    filtered.add(ai);
+                }
+            } else {
+                filtered.add(ai);
+            }
+        }
+        return filtered;
+    }
+
     private volatile UserManager mUserManager;
     private volatile PermissionManager mPermissionManager;
     private volatile PackageInstaller mInstaller;
@@ -285,6 +346,9 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public PackageInfo getPackageInfoAsUser(String packageName, PackageInfoFlags flags, int userId)
             throws NameNotFoundException {
+        if (shouldHidePackageFromCaller(packageName)) {
+            throw new NameNotFoundException(packageName);
+        }
         PackageInfo pi =
                 getPackageInfoAsUserCached(
                         packageName,
@@ -547,6 +611,9 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public ApplicationInfo getApplicationInfoAsUser(String packageName, ApplicationInfoFlags flags,
             int userId) throws NameNotFoundException {
+        if (shouldHidePackageFromCaller(packageName)) {
+            throw new NameNotFoundException(packageName);
+        }
         ApplicationInfo ai = getApplicationInfoAsUserCached(
                         packageName,
                         updateFlagsForApplication(flags.getValue(), userId),
@@ -1309,7 +1376,7 @@ public class ApplicationPackageManager extends PackageManager {
             if (parceledList == null) {
                 return Collections.emptyList();
             }
-            return parceledList.getList();
+            return filterHiddenPackages(parceledList.getList());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1410,7 +1477,7 @@ public class ApplicationPackageManager extends PackageManager {
             if (parceledList == null) {
                 return Collections.emptyList();
             }
-            return parceledList.getList();
+            return filterHiddenApplications(parceledList.getList());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -346,7 +346,16 @@ public final class PixelDeviceRepository {
                     "com.nothing.smartcenter",
                     "com.realme.link",
                     "in.startv.hotstar",
-                    "jp.id_credit_sp2.android"
+                    "jp.id_credit_sp2.android",
+                    "com.google.android.apps.nbu.paisa.user",
+                    "com.phonepe.app",
+                    "in.org.npci.upiapp",
+                    "com.sbi.lotusintouch",
+                    "com.msf.kbeacon",
+                    "com.snapwork.hdfc",
+                    "com.csam.icici.bank.imobile",
+                    "com.dreamplug.androidapp",
+                    "net.one97.paytm"
             )));
 
     /**
