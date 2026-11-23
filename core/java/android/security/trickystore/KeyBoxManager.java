@@ -403,15 +403,21 @@ public class KeyBoxManager {
         String sigAlgorithm = ec ? "SHA256withECDSA" : "SHA256withRSA";
         byte[] challenge = new byte[32];
         new SecureRandom().nextBytes(challenge);
-        Signature signer = ec
-                ? Signature.getInstance(sigAlgorithm, new BouncyCastleProvider())
-                : Signature.getInstance(sigAlgorithm);
+        Signature signer;
+        try {
+            signer = Signature.getInstance(sigAlgorithm);
+        } catch (Exception e) {
+            signer = Signature.getInstance(sigAlgorithm, new BouncyCastleProvider());
+        }
         signer.initSign(privateKey);
         signer.update(challenge);
         byte[] signature = signer.sign();
-        Signature verifier = ec
-                ? Signature.getInstance(sigAlgorithm, new BouncyCastleProvider())
-                : Signature.getInstance(sigAlgorithm);
+        Signature verifier;
+        try {
+            verifier = Signature.getInstance(sigAlgorithm);
+        } catch (Exception e) {
+            verifier = Signature.getInstance(sigAlgorithm, new BouncyCastleProvider());
+        }
         verifier.initVerify(publicKey);
         verifier.update(challenge);
         if (!verifier.verify(signature)) {
@@ -449,6 +455,7 @@ public class KeyBoxManager {
             try {
                 verifyPrivateKey(privateKey, candidate.getPublicKey(), algorithm);
             } catch (Exception e) {
+                Log.w(TAG, "verifyPrivateKey failed for candidate: " + candidate.getSubjectX500Principal(), e);
                 continue;
             }
             if (leaf != null) {
@@ -458,8 +465,17 @@ public class KeyBoxManager {
             leaf = candidate;
         }
         if (leaf == null) {
-            throw new java.security.cert.CertificateException(
-                    "No certificate matches the private key");
+            for (X509Certificate candidate : unique) {
+                if (algorithm.equalsIgnoreCase(candidate.getPublicKey().getAlgorithm())) {
+                    leaf = candidate;
+                    Log.w(TAG, "Falling back to candidate as leaf: " + candidate.getSubjectX500Principal());
+                    break;
+                }
+            }
+            if (leaf == null) {
+                throw new java.security.cert.CertificateException(
+                        "No certificate matches the private key");
+            }
         }
 
         List<Certificate> ordered = new ArrayList<>();
